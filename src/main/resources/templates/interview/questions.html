@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark" lang="en">
+<head th:replace="~{fragments/layout :: head('Interview in Progress')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<!-- Timer bar -->
+<div class="timer-bar d-flex align-items-center justify-content-between px-4">
+    <div class="d-flex align-items-center gap-3">
+        <span class="fw-700" style="color:var(--text-muted);font-size:0.85rem;">
+            <i class="bi bi-collection me-1"></i>
+            <span th:text="${domain.name}">Java</span>
+        </span>
+        <span style="color:var(--border);">|</span>
+        <span style="color:var(--text-muted);font-size:0.82rem;">
+            <span th:text="${#lists.size(questions)}">10</span> Questions
+        </span>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-stopwatch" style="color:var(--text-muted);"></i>
+        <span class="timer-badge" id="timerBadge">30:00</span>
+    </div>
+</div>
+
+<main class="container py-4">
+
+    <div class="page-header animate-in mb-3">
+        <h1 class="page-title" style="font-size:1.4rem;">
+            <i class="bi bi-play-circle-fill me-2" style="color:var(--primary-light);"></i>
+            Interview Session
+        </h1>
+        <p class="page-subtitle">Answer all questions — empty answers score 0. You have 30 minutes.</p>
+    </div>
+
+    <!-- Overall progress -->
+    <div class="mb-4 animate-in">
+        <div class="d-flex justify-content-between mb-1">
+            <span style="font-size:0.8rem;color:var(--text-muted);">Progress</span>
+            <span id="progressText" style="font-size:0.8rem;color:var(--text-muted);">0 / <span th:text="${#lists.size(questions)}">10</span> answered</span>
+        </div>
+        <div class="progress"><div id="progressBar" class="progress-bar" style="width:0%"></div></div>
+    </div>
+
+    <form th:action="@{/interview/submit}" method="post" id="interviewForm">
+        <input type="hidden" name="sessionId" th:value="${interviewSession.id}"/>
+
+        <div class="question-card animate-in"
+             th:each="q, stat : ${questions}">
+            <div class="question-header">
+                <span class="question-number" th:text="${stat.index + 1}">1</span>
+                <div>
+                    <div class="question-text" th:text="${q.questionText}">Question text</div>
+                    <div class="mt-2">
+                        <span class="badge"
+                              th:class="'badge difficulty-' + ${#strings.toLowerCase(q.difficulty)}"
+                              th:text="${q.difficulty}">MEDIUM</span>
+                        <span class="ms-2" style="font-size:0.78rem;color:var(--text-dim);"
+                              th:text="${q.domain.name}">Domain</span>
+                    </div>
+                </div>
+            </div>
+            <div class="question-body">
+                <label class="form-label">Your Answer</label>
+                <textarea class="form-control answer-area"
+                          th:name="'answers[' + ${q.id} + ']'"
+                          rows="5"
+                          placeholder="Type your answer here. Be thorough and include key concepts..."
+                          data-max="2000"
+                          data-qindex="1"
+                          style="resize:vertical;min-height:120px;"></textarea>
+            </div>
+        </div>
+
+        <div class="text-center mt-4 mb-2 animate-in">
+            <button type="button" id="submitBtn" class="btn btn-success btn-lg px-5"
+                    onclick="confirmSubmit()">
+                <i class="bi bi-check2-circle"></i> Submit Interview
+            </button>
+            <p class="mt-2" style="font-size:0.78rem;color:var(--text-dim);">
+                Answers will be evaluated by AI. Results are available immediately.
+            </p>
+        </div>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+
+<script>
+    // Start 30-minute countdown
+    window.startTimer(30);
+
+    // Track answered questions for progress bar
+    const total = document.querySelectorAll('.answer-area').length;
+    document.querySelectorAll('.answer-area').forEach(ta => {
+        ta.addEventListener('input', updateProgress);
+    });
+    function updateProgress() {
+        const answered = [...document.querySelectorAll('.answer-area')]
+            .filter(t => t.value.trim().length > 0).length;
+        document.getElementById('progressBar').style.width = (answered / total * 100) + '%';
+        document.getElementById('progressText').innerHTML =
+            answered + ' / ' + total + ' answered';
+    }
+
+    // Safe submit — verify sessionId is present before submitting
+    function confirmSubmit() {
+        const sessionIdField = document.querySelector('input[name="sessionId"]');
+        if (!sessionIdField || !sessionIdField.value) {
+            alert('Error: Session ID is missing. Please go back and start a new interview.');
+            return;
+        }
+        if (confirm('Submit all answers? This cannot be undone.')) {
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').innerHTML = '<i class="bi bi-hourglass-split"></i> Submitting...';
+            document.getElementById('interviewForm').submit();
+        }
+    }
+</script>
+</body>
+</html>

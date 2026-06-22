@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      data-bs-theme="dark" lang="en">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container-fluid px-4 py-4">
+
+    <!-- Flash messages -->
+    <div th:if="${error}" class="alert alert-danger auto-dismiss animate-in">
+        <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}"></span>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header animate-in">
+        <h1 class="page-title">
+            Welcome back, <span class="text-gradient" th:text="${user.name}">Student</span> 👋
+        </h1>
+        <p class="page-subtitle">Track your progress and sharpen your skills</p>
+    </div>
+
+    <!-- ── Stat Cards ─────────────────────────────────────────────────────── -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card animate-in animate-in-delay-1">
+                <div class="stat-icon indigo"><i class="bi bi-play-circle-fill"></i></div>
+                <div class="stat-value" th:text="${totalInterviews}">0</div>
+                <div class="stat-label">Interviews Taken</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card animate-in animate-in-delay-2">
+                <div class="stat-icon success"><i class="bi bi-bar-chart-fill"></i></div>
+                <div class="stat-value" th:text="${avgScore + '%'}">0%</div>
+                <div class="stat-label">Average Score</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card animate-in animate-in-delay-3">
+                <div class="stat-icon warning"><i class="bi bi-trophy-fill"></i></div>
+                <div class="stat-value" th:text="${bestScore + '%'}">0%</div>
+                <div class="stat-label">Best Score</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card animate-in animate-in-delay-4">
+                <div class="stat-icon info"><i class="bi bi-calendar-check-fill"></i></div>
+                <div class="stat-value" th:if="${lastSession != null}"
+                     th:text="${#temporals.format(lastSession.startTime, 'dd MMM')}">—</div>
+                <div class="stat-value" th:if="${lastSession == null}">—</div>
+                <div class="stat-label">Last Attempt</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- ── Score Trend Chart ───────────────────────────────────────────── -->
+        <div class="col-lg-8">
+            <div class="card animate-in" style="height:320px;">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <span><i class="bi bi-graph-up me-2" style="color:var(--primary-light)"></i>Score Trend</span>
+                    <a th:href="@{/history}" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-list"></i> Full History
+                    </a>
+                </div>
+                <div class="card-body" style="position:relative;height:240px;">
+                    <div th:if="${#lists.isEmpty(recentSessions)}"
+                         class="d-flex flex-column align-items-center justify-content-center h-100"
+                         style="color:var(--text-dim);">
+                        <i class="bi bi-bar-chart" style="font-size:2rem;margin-bottom:0.5rem;"></i>
+                        <span>No interviews yet — take your first one!</span>
+                    </div>
+                    <canvas id="scoreTrendChart" th:if="${!#lists.isEmpty(recentSessions)}"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Domain Distribution ────────────────────────────────────────── -->
+        <div class="col-lg-4">
+            <div class="card animate-in" style="height:320px;">
+                <div class="card-header">
+                    <i class="bi bi-pie-chart me-2" style="color:var(--primary-light)"></i>By Domain
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center" style="height:255px;">
+                    <div th:if="${#lists.isEmpty(recentSessions)}"
+                         class="text-center" style="color:var(--text-dim);">
+                        <i class="bi bi-pie-chart" style="font-size:2rem;"></i>
+                        <p class="mt-2 mb-0">No data yet</p>
+                    </div>
+                    <canvas id="domainChart" th:if="${!#lists.isEmpty(recentSessions)}"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- ── Quick Actions ──────────────────────────────────────────────── -->
+        <div class="col-lg-4">
+            <div class="card animate-in h-100">
+                <div class="card-header">
+                    <i class="bi bi-lightning me-2" style="color:var(--primary-light)"></i>Quick Actions
+                </div>
+                <div class="card-body d-flex flex-column gap-2">
+                    <a th:href="@{/interview}" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-play-circle-fill"></i> Start New Interview
+                    </a>
+                    <a th:href="@{/history}" class="btn btn-secondary w-100">
+                        <i class="bi bi-clock-history"></i> View Interview History
+                    </a>
+                    <a th:href="@{/profile}" class="btn btn-secondary w-100">
+                        <i class="bi bi-person-circle"></i> Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Recent Sessions ────────────────────────────────────────────── -->
+        <div class="col-lg-8">
+            <div class="card animate-in">
+                <div class="card-header">
+                    <i class="bi bi-clock-history me-2" style="color:var(--primary-light)"></i>Recent Sessions
+                </div>
+                <div th:if="${#lists.isEmpty(recentSessions)}" class="card-body text-center py-5"
+                     style="color:var(--text-dim);">
+                    <i class="bi bi-inbox" style="font-size:2.5rem;"></i>
+                    <p class="mt-2">No sessions yet. Start your first interview!</p>
+                    <a th:href="@{/interview}" class="btn btn-primary">
+                        <i class="bi bi-play-circle-fill"></i> Begin Now
+                    </a>
+                </div>
+                <div th:if="${!#lists.isEmpty(recentSessions)}" class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Domain</th>
+                                <th>Date</th>
+                                <th>Score</th>
+                                <th>Duration</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="s : ${recentSessions}">
+                                <td>
+                                    <span class="fw-600" th:text="${s.domain.name}">Java</span>
+                                </td>
+                                <td style="color:var(--text-muted);font-size:0.82rem;">
+                                    <span th:text="${#temporals.format(s.startTime, 'dd MMM yyyy')}">01 Jan</span>
+                                </td>
+                                <td>
+                                    <span th:if="${s.score != null}"
+                                          th:class="'badge difficulty-' + ${s.score >= 75 ? 'easy' : s.score >= 50 ? 'medium' : 'hard'}"
+                                          th:text="${#numbers.formatDecimal(s.score, 1, 1) + '%'}">85%</span>
+                                    <span th:if="${s.score == null}" class="badge" style="background:var(--bg-input);color:var(--text-dim);">—</span>
+                                </td>
+                                <td style="color:var(--text-muted);font-size:0.82rem;">
+                                    <span th:text="${s.durationMinutes + ' min'}">5 min</span>
+                                </td>
+                                <td>
+                                    <span th:class="'badge ' + (${s.status == 'COMPLETED'} ? 'difficulty-easy' : 'difficulty-medium')"
+                                          th:text="${s.status}">COMPLETED</span>
+                                </td>
+                                <td>
+                                    <a th:if="${s.status == 'COMPLETED'}"
+                                       th:href="@{'/result/' + ${s.id}}"
+                                       class="btn btn-secondary btn-sm">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+
+<script th:inline="javascript">
+    const labels  = /*[[${chartLabels}]]*/ '[]';
+    const scores  = /*[[${chartScores}]]*/ '[]';
+    const dLabels = /*[[${domainLabels}]]*/ '[]';
+    const dData   = /*[[${domainData}]]*/ '[]';
+    window.initCharts(JSON.parse(labels), JSON.parse(scores), JSON.parse(dLabels), JSON.parse(dData));
+</script>
+</body>
+</html>

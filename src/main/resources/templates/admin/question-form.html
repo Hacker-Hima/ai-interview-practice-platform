@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark" lang="en">
+<head th:replace="~{fragments/layout :: head('Add / Edit Question')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-4">
+    <div class="page-header animate-in d-flex align-items-center gap-3 mb-4">
+        <a th:href="@{/admin/questions}" class="btn btn-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+        <h1 class="page-title mb-0" style="font-size:1.4rem;"
+            th:text="${question.id != null ? 'Edit Question' : 'Add New Question'}">Add Question</h1>
+    </div>
+
+    <div class="card animate-in" style="max-width:800px;margin:0 auto;">
+        <div class="card-body">
+            <form th:action="@{/admin/questions/save}" th:object="${question}" method="post">
+                <input type="hidden" th:field="*{id}"/>
+
+                <div class="mb-3">
+                    <label class="form-label">Question Text *</label>
+                    <textarea th:field="*{questionText}" class="form-control" rows="4"
+                              placeholder="Write the interview question clearly..." required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Expected / Reference Answer *</label>
+                    <textarea th:field="*{expectedAnswer}" class="form-control" rows="6"
+                              placeholder="Provide a comprehensive reference answer..." required></textarea>
+                    <div class="form-text" style="font-size:0.75rem;color:var(--text-dim);">
+                        This is used for keyword matching and as context for AI evaluation.
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Domain *</label>
+                        <select name="domainId" class="form-select" required>
+                            <option value="">-- Select Domain --</option>
+                            <option th:each="d : ${domains}"
+                                    th:value="${d.id}"
+                                    th:text="${d.name}"
+                                    th:selected="${question.domain != null && question.domain.id == d.id}">Domain</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Difficulty *</label>
+                        <select th:field="*{difficulty}" class="form-select" required>
+                            <option value="">-- Select Difficulty --</option>
+                            <option value="EASY" th:selected="${question.difficulty == 'EASY'}">Easy</option>
+                            <option value="MEDIUM" th:selected="${question.difficulty == 'MEDIUM'}">Medium</option>
+                            <option value="HARD" th:selected="${question.difficulty == 'HARD'}">Hard</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check2"></i>
+                        <span th:text="${question.id != null ? 'Update Question' : 'Add Question'}">Save</span>
+                    </button>
+                    <a th:href="@{/admin/questions}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

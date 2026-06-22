@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Interview</title>
+</head>
+<body>
+
+<h1>Interview Questions</h1>
+
+<form action="/result">
+
+<div th:each="q : ${questions}">
+
+    <h3 th:text="${q.questionText}"></h3>
+
+    <textarea rows="4" cols="50"></textarea>
+
+    <br><br>
+
+</div>
+
+<button type="submit">
+Submit Interview
+</button>
+
+</form>
+
+</body>
+</html>

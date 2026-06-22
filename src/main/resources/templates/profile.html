@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark" lang="en">
+<head th:replace="~{fragments/layout :: head('My Profile')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-4">
+    <div class="page-header animate-in">
+        <h1 class="page-title"><i class="bi bi-person-circle me-2" style="color:var(--primary-light);"></i>My Profile</h1>
+        <p class="page-subtitle">Update your personal information and password</p>
+    </div>
+
+    <!-- Alerts -->
+    <div th:if="${success}" class="alert alert-success auto-dismiss animate-in">
+        <i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span>
+    </div>
+    <div th:if="${pwSuccess}" class="alert alert-success auto-dismiss animate-in">
+        <i class="bi bi-check-circle-fill"></i> <span th:text="${pwSuccess}"></span>
+    </div>
+    <div th:if="${pwError}" class="alert alert-danger auto-dismiss animate-in">
+        <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${pwError}"></span>
+    </div>
+
+    <div class="row g-4">
+        <!-- ── Personal Info ──────────────────────────────────────────────── -->
+        <div class="col-lg-6">
+            <div class="card animate-in h-100">
+                <div class="card-header">
+                    <i class="bi bi-person me-2" style="color:var(--primary-light);"></i>Personal Information
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/profile/update}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" name="name" class="form-control"
+                                   th:value="${user.name}" required/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control" th:value="${user.email}" disabled
+                                   style="opacity:0.6;cursor:not-allowed;"/>
+                            <div class="form-text" style="font-size:0.75rem;color:var(--text-dim);">Email cannot be changed</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">College / University</label>
+                            <input type="text" name="college" class="form-control"
+                                   th:value="${user.college}" placeholder="e.g. IIT Madras"/>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-8">
+                                <label class="form-label">Department</label>
+                                <input type="text" name="department" class="form-control"
+                                       th:value="${user.department}" placeholder="e.g. Computer Science"/>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label">Graduation Year</label>
+                                <input type="number" name="graduationYear" class="form-control"
+                                       th:value="${user.graduationYear}" placeholder="2026" min="2020" max="2030"/>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Role</label>
+                            <input type="text" class="form-control" th:value="${user.role}" disabled
+                                   style="opacity:0.6;cursor:not-allowed;"/>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-check2"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Change Password ────────────────────────────────────────────── -->
+        <div class="col-lg-6">
+            <div class="card animate-in animate-in-delay-1 h-100">
+                <div class="card-header">
+                    <i class="bi bi-shield-lock me-2" style="color:var(--primary-light);"></i>Change Password
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/profile/change-password}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" name="currentPassword" class="form-control"
+                                   placeholder="••••••••" required/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">New Password</label>
+                            <input type="password" name="newPassword" class="form-control"
+                                   placeholder="Min 6 characters" required minlength="6"/>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Confirm New Password</label>
+                            <input type="password" name="confirmPassword" class="form-control"
+                                   placeholder="Re-enter new password" required minlength="6"/>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-lock-fill"></i> Change Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

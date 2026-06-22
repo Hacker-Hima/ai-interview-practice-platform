@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark" lang="en">
+<head th:replace="~{fragments/layout :: head('Manage Users')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-4">
+    <div class="page-header animate-in d-flex align-items-center justify-content-between">
+        <div>
+            <h1 class="page-title"><i class="bi bi-people me-2" style="color:var(--primary-light);"></i>User Management</h1>
+            <p class="page-subtitle">View and manage registered users</p>
+        </div>
+        <span class="badge px-3 py-2" style="background:rgba(99,102,241,0.15);color:var(--primary-light);font-size:0.9rem;"
+              th:text="${#lists.size(users)} + ' users'">0 users</span>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success auto-dismiss animate-in">
+        <i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span>
+    </div>
+
+    <div class="card animate-in">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>College</th><th>Dept.</th><th>Grad. Year</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    <tr th:each="u, stat : ${users}">
+                        <td style="color:var(--text-dim);" th:text="${stat.index + 1}">1</td>
+                        <td class="fw-600" th:text="${u.name}">Name</td>
+                        <td style="color:var(--text-muted);font-size:0.85rem;" th:text="${u.email}">email</td>
+                        <td>
+                            <span th:class="'badge ' + (${u.role == 'ADMIN'} ? 'difficulty-hard' : 'difficulty-easy')"
+                                  th:text="${u.role}">STUDENT</span>
+                        </td>
+                        <td style="color:var(--text-muted);font-size:0.82rem;" th:text="${u.college ?: '—'}">—</td>
+                        <td style="color:var(--text-muted);font-size:0.82rem;" th:text="${u.department ?: '—'}">—</td>
+                        <td style="color:var(--text-muted);font-size:0.82rem;" th:text="${u.graduationYear ?: '—'}">—</td>
+                        <td>
+                            <a th:if="${u.role != 'ADMIN'}"
+                               th:href="@{'/admin/users/delete/' + ${u.id}}"
+                               class="btn btn-danger btn-sm"
+                               data-confirm="Permanently delete this user and all their data?">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                            <span th:if="${u.role == 'ADMIN'}" style="color:var(--text-dim);font-size:0.8rem;">Protected</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

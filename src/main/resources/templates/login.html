@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark" lang="en">
+<head th:replace="~{fragments/layout :: head('Login')}"></head>
+<body>
+
+<div class="auth-wrapper">
+    <div class="auth-card animate-in">
+
+        <!-- Logo -->
+        <div class="auth-logo">
+            <div class="auth-logo-icon"><i class="bi bi-braces-asterisk"></i></div>
+            <h1 class="auth-title mt-2">Welcome Back</h1>
+            <p class="auth-subtitle">Sign in to continue your interview prep</p>
+        </div>
+
+        <!-- Alerts -->
+        <div th:if="${error}" class="alert alert-danger auto-dismiss mb-3">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="${error}">Error</span>
+        </div>
+        <div th:if="${message}" class="alert alert-success auto-dismiss mb-3">
+            <i class="bi bi-check-circle-fill"></i>
+            <span th:text="${message}">Message</span>
+        </div>
+        <div th:if="${param.registered}" class="alert alert-success auto-dismiss mb-3">
+            <i class="bi bi-check-circle-fill"></i> Account created! Please log in.
+        </div>
+
+        <!-- Login Form -->
+        <form th:action="@{/login}" method="post">
+            <div class="mb-3">
+                <label class="form-label" for="email">Email Address</label>
+                <div class="input-group">
+                    <span class="input-group-text" style="background:var(--bg-input);border-color:var(--border);color:var(--text-muted);">
+                        <i class="bi bi-envelope"></i>
+                    </span>
+                    <input type="email" id="email" name="email" class="form-control"
+                           placeholder="you@example.com" required autocomplete="email"/>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label" for="password">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text" style="background:var(--bg-input);border-color:var(--border);color:var(--text-muted);">
+                        <i class="bi bi-lock"></i>
+                    </span>
+                    <input type="password" id="password" name="password" class="form-control"
+                           placeholder="••••••••" required autocomplete="current-password"/>
+                </div>
+            </div>
+
+            <button type="submit" id="loginBtn" class="btn btn-primary w-100 btn-lg">
+                <i class="bi bi-box-arrow-in-right"></i> Sign In
+            </button>
+        </form>
+
+        <div class="divider"></div>
+
+        <p class="text-center mb-0" style="color:var(--text-muted);font-size:0.875rem;">
+            Don't have an account?
+            <a th:href="@{/register}" style="color:var(--primary-light);font-weight:600;">Create one free</a>
+        </p>
+
+        <!-- Demo hint -->
+        <div class="mt-3 p-3 rounded" style="background:rgba(99,102,241,0.08);border:1px solid var(--border);">
+            <p class="mb-1" style="font-size:0.78rem;color:var(--text-dim);font-weight:600;">DEMO CREDENTIALS</p>
+            <p class="mb-0" style="font-size:0.8rem;color:var(--text-muted);">
+                <i class="bi bi-shield-check" style="color:var(--warning);"></i>
+                Admin: <code style="color:var(--primary-light);">admin@aiinterview.com</code> / <code style="color:var(--primary-light);">admin123</code>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

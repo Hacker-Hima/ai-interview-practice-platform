@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark" lang="en">
+<head th:replace="~{fragments/layout :: head('Error')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5 text-center">
+    <div class="animate-in" style="max-width:480px;margin:0 auto;">
+        <div style="font-size:4rem;margin-bottom:1rem;">
+            <span th:if="${status == 404}">🔍</span>
+            <span th:if="${status == 403}">🔒</span>
+            <span th:if="${status == 500}">⚠️</span>
+            <span th:unless="${status == 404 || status == 403 || status == 500}">💥</span>
+        </div>
+        <h1 class="text-gradient fw-800 mb-2" style="font-size:3rem;" th:text="${status}">Error</h1>
+        <h2 class="fw-600 mb-3" style="font-size:1.3rem;color:var(--text-muted);" th:text="${error}">An error occurred</h2>
+        <p style="color:var(--text-dim);font-size:0.9rem;" th:text="${message}">Please try again.</p>
+        <div class="mt-4 d-flex gap-3 justify-content-center">
+            <a th:href="@{/dashboard}" class="btn btn-primary">
+                <i class="bi bi-house"></i> Go to Dashboard
+            </a>
+            <button onclick="history.back()" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Go Back
+            </button>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

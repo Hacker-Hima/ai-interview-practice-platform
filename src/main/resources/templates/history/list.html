@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark" lang="en">
+<head th:replace="~{fragments/layout :: head('Interview History')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-4">
+    <div class="page-header animate-in d-flex align-items-center justify-content-between">
+        <div>
+            <h1 class="page-title"><i class="bi bi-clock-history me-2" style="color:var(--primary-light);"></i>Interview History</h1>
+            <p class="page-subtitle">Review all your past practice sessions</p>
+        </div>
+        <a th:href="@{/interview}" class="btn btn-primary">
+            <i class="bi bi-play-circle-fill"></i> New Interview
+        </a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(sessions)}" class="text-center py-5 animate-in" style="color:var(--text-dim);">
+        <i class="bi bi-inbox" style="font-size:3rem;"></i>
+        <p class="mt-3 mb-3">No interview sessions yet.</p>
+        <a th:href="@{/interview}" class="btn btn-primary btn-lg">
+            <i class="bi bi-play-circle-fill"></i> Take Your First Interview
+        </a>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(sessions)}" class="card animate-in">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Domain</th>
+                        <th>Date &amp; Time</th>
+                        <th>Score</th>
+                        <th>Duration</th>
+                        <th>Performance</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="s, stat : ${sessions}">
+                        <td style="color:var(--text-dim);" th:text="${stat.index + 1}">1</td>
+                        <td>
+                            <span class="fw-600" th:text="${s.domain.name}">Java</span>
+                        </td>
+                        <td style="color:var(--text-muted);font-size:0.82rem;">
+                            <span th:text="${#temporals.format(s.startTime, 'dd MMM yyyy')}"></span><br/>
+                            <span style="color:var(--text-dim);" th:text="${#temporals.format(s.startTime, 'HH:mm')}"></span>
+                        </td>
+                        <td>
+                            <span th:if="${s.score != null}"
+                                  th:class="'badge difficulty-' + ${s.score >= 75 ? 'easy' : s.score >= 50 ? 'medium' : 'hard'}"
+                                  th:text="${#numbers.formatDecimal(s.score,1,1) + '%'}">85%</span>
+                            <span th:if="${s.score == null}" class="badge" style="background:var(--bg-input);color:var(--text-dim);">—</span>
+                        </td>
+                        <td style="color:var(--text-muted);font-size:0.82rem;" th:text="${s.durationMinutes + ' min'}">5 min</td>
+                        <td>
+                            <span th:if="${s.score != null}" th:class="'badge difficulty-' + ${s.performanceBadgeClass}"
+                                  th:text="${s.performanceLabel}">Good</span>
+                        </td>
+                        <td>
+                            <span th:class="'badge ' + (${s.status == 'COMPLETED'} ? 'difficulty-easy' : 'difficulty-medium')"
+                                  th:text="${s.status}">COMPLETED</span>
+                        </td>
+                        <td>
+                            <a th:if="${s.status == 'COMPLETED'}" th:href="@{'/history/' + ${s.id}}"
+                               class="btn btn-secondary btn-sm">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                            <a th:href="@{/interview/start(domainId=${s.domain.id})}"
+                               class="btn btn-outline-primary btn-sm ms-1">
+                                <i class="bi bi-arrow-repeat"></i> Retry
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

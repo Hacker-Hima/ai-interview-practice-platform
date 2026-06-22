@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark" lang="en">
+<head th:replace="~{fragments/layout :: head('Admin Dashboard')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container-fluid px-4 py-4">
+
+    <div class="page-header animate-in">
+        <h1 class="page-title"><i class="bi bi-speedometer2 me-2" style="color:var(--primary-light);"></i>Admin Dashboard</h1>
+        <p class="page-subtitle">Platform overview and management</p>
+    </div>
+
+    <!-- Flash -->
+    <div th:if="${success}" class="alert alert-success auto-dismiss animate-in">
+        <i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span>
+    </div>
+
+    <!-- ── Stats ─────────────────────────────────────────────────────────── -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card animate-in animate-in-delay-1">
+                <div class="stat-icon indigo"><i class="bi bi-people-fill"></i></div>
+                <div class="stat-value" th:text="${stats.totalUsers}">0</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card animate-in animate-in-delay-2">
+                <div class="stat-icon success"><i class="bi bi-question-circle-fill"></i></div>
+                <div class="stat-value" th:text="${stats.totalQuestions}">0</div>
+                <div class="stat-label">Questions</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card animate-in animate-in-delay-3">
+                <div class="stat-icon warning"><i class="bi bi-play-circle-fill"></i></div>
+                <div class="stat-value" th:text="${stats.totalInterviews}">0</div>
+                <div class="stat-label">Interviews</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card animate-in animate-in-delay-4">
+                <div class="stat-icon info"><i class="bi bi-bar-chart-fill"></i></div>
+                <div class="stat-value" th:text="${stats.overallAvgScore + '%'}">0%</div>
+                <div class="stat-label">Avg Score</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Quick Admin Actions ────────────────────────────────────────────── -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4 animate-in">
+            <a th:href="@{/admin/domains}" class="card text-decoration-none" style="transition:var(--transition);">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon success"><i class="bi bi-collection-fill"></i></div>
+                    <div>
+                        <div class="fw-700" style="color:var(--text);">Domain Management</div>
+                        <div style="font-size:0.8rem;color:var(--text-muted);">Add, edit, or remove domains</div>
+                    </div>
+                    <i class="bi bi-arrow-right ms-auto" style="color:var(--text-dim);"></i>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 animate-in animate-in-delay-1">
+            <a th:href="@{/admin/questions}" class="card text-decoration-none" style="transition:var(--transition);">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon warning"><i class="bi bi-question-square-fill"></i></div>
+                    <div>
+                        <div class="fw-700" style="color:var(--text);">Question Bank</div>
+                        <div style="font-size:0.8rem;color:var(--text-muted);">Manage interview questions</div>
+                    </div>
+                    <i class="bi bi-arrow-right ms-auto" style="color:var(--text-dim);"></i>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 animate-in animate-in-delay-2">
+            <a th:href="@{/admin/users}" class="card text-decoration-none" style="transition:var(--transition);">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon indigo"><i class="bi bi-person-lines-fill"></i></div>
+                    <div>
+                        <div class="fw-700" style="color:var(--text);">User Management</div>
+                        <div style="font-size:0.8rem;color:var(--text-muted);">View and manage users</div>
+                    </div>
+                    <i class="bi bi-arrow-right ms-auto" style="color:var(--text-dim);"></i>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- ── User List ──────────────────────────────────────────────────────── -->
+    <div class="card animate-in">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <span><i class="bi bi-people me-2" style="color:var(--primary-light);"></i>Registered Users</span>
+            <span class="badge" style="background:rgba(99,102,241,0.15);color:var(--primary-light);"
+                  th:text="${#lists.size(users)} + ' users'">0 users</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>College</th><th>Actions</th></tr></thead>
+                <tbody>
+                    <tr th:each="u, stat : ${users}">
+                        <td style="color:var(--text-dim);" th:text="${stat.index + 1}">1</td>
+                        <td class="fw-600" th:text="${u.name}">Name</td>
+                        <td style="color:var(--text-muted);" th:text="${u.email}">email</td>
+                        <td>
+                            <span th:class="'badge ' + (${u.role == 'ADMIN'} ? 'difficulty-hard' : 'difficulty-easy')"
+                                  th:text="${u.role}">STUDENT</span>
+                        </td>
+                        <td style="color:var(--text-muted);font-size:0.82rem;" th:text="${u.college ?: '—'}">—</td>
+                        <td>
+                            <a th:if="${u.role != 'ADMIN'}"
+                               th:href="@{'/admin/users/delete/' + ${u.id}}"
+                               class="btn btn-danger btn-sm"
+                               data-confirm="Delete this user? This cannot be undone.">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark" lang="en">
+<head th:replace="~{fragments/layout :: head('Interview Result')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-4">
+
+    <!-- ── Score Hero ──────────────────────────────────────────────────────── -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10">
+            <div class="card animate-in" style="background:linear-gradient(135deg,#0f0f2e,#141432);">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-4 text-center border-end" style="border-color:var(--border)!important;">
+                            <div class="score-ring-container">
+                                <div class="score-ring">
+                                    <svg width="160" height="160" viewBox="0 0 160 160">
+                                        <defs>
+                                            <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" style="stop-color:#667eea"/>
+                                                <stop offset="100%" style="stop-color:#764ba2"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <circle class="score-ring-circle-bg" cx="80" cy="80" r="65"/>
+                                        <circle class="score-ring-circle" id="scoreCircle" cx="80" cy="80" r="65"/>
+                                    </svg>
+                                    <div class="score-ring-text">
+                                        <span class="score-number" th:text="${score}">85</span>
+                                        <span class="score-percent">%</span>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <span th:class="'badge px-3 py-2 fs-6 difficulty-' + ${interviewSession.performanceBadgeClass}"
+                                          th:text="${interviewSession.performanceLabel}">Excellent</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8 px-4 py-3">
+                            <h2 class="fw-800 text-gradient mb-1" style="font-size:1.5rem;">Interview Complete!</h2>
+                            <p style="color:var(--text-muted);font-size:0.875rem;" class="mb-3">
+                                <i class="bi bi-collection me-1"></i> <span th:text="${interviewSession.domain.name}">Java</span>
+                                &nbsp;·&nbsp;
+                                <i class="bi bi-stopwatch me-1"></i> <span th:text="${interviewSession.durationMinutes + ' min'}">5 min</span>
+                                &nbsp;·&nbsp;
+                                <i class="bi bi-calendar me-1"></i>
+                                <span th:text="${#temporals.format(interviewSession.startTime, 'dd MMM yyyy HH:mm')}">01 Jan</span>
+                            </p>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-4">
+                                    <div class="p-2 rounded text-center" style="background:var(--success-dim);">
+                                        <div class="fw-700" style="color:var(--success);font-size:1.1rem;" th:text="${#lists.size(answers)}">10</div>
+                                        <div style="font-size:0.72rem;color:var(--text-muted);">Questions</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-2 rounded text-center" th:style="'background:' + (${aiEvaluated} ? 'var(--info-dim)' : 'var(--warning-dim)') + ';'">
+                                        <div class="fw-700" th:style="'color:' + (${aiEvaluated} ? 'var(--info)' : 'var(--warning)') + ';'" style="font-size:1.1rem;"
+                                             th:text="${aiEvalCount}">10</div>
+                                        <div style="font-size:0.72rem;color:var(--text-muted);">AI Eval</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-2 rounded text-center" style="background:rgba(99,102,241,0.12);">
+                                        <div class="fw-700" style="color:var(--primary-light);font-size:1.1rem;" th:text="${score + '%'}">85%</div>
+                                        <div style="font-size:0.72rem;color:var(--text-muted);">Final Score</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2">
+                                <a th:href="@{/interview}" class="btn btn-primary">
+                                    <i class="bi bi-arrow-repeat"></i> Try Again
+                                </a>
+                                <a th:href="@{/history}" class="btn btn-secondary">
+                                    <i class="bi bi-clock-history"></i> View History
+                                </a>
+                                <a th:href="@{/dashboard}" class="btn btn-secondary">
+                                    <i class="bi bi-grid"></i> Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Answer Breakdown ────────────────────────────────────────────────── -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h3 class="fw-700 mb-3" style="font-size:1.1rem;color:var(--text-muted);">
+                <i class="bi bi-list-check me-2"></i>Answer Breakdown
+            </h3>
+            <div class="accordion" id="answersAccordion">
+                <div class="accordion-item" th:each="ans, stat : ${answers}">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button"
+                                data-bs-toggle="collapse"
+                                th:data-bs-target="'#ans' + ${stat.index}">
+                            <span class="question-number me-2" th:text="${stat.index + 1}">1</span>
+                            <span class="flex-grow-1 me-3" th:text="${#strings.abbreviate(ans.question.questionText, 80)}">Q</span>
+                            <span th:class="'badge ms-auto me-2 difficulty-' + ${ans.scoreBadgeClass}"
+                                  th:text="${ans.score + '%'}">85%</span>
+                            <span th:if="${ans.evaluatedByAI}"
+                                  class="badge" style="background:var(--info-dim);color:var(--info);font-size:0.7rem;">
+                                <i class="bi bi-robot"></i> AI
+                            </span>
+                        </button>
+                    </h2>
+                    <div th:id="'ans' + ${stat.index}" class="accordion-collapse collapse"
+                         data-bs-parent="#answersAccordion">
+                        <div class="accordion-body">
+
+                            <!-- Question -->
+                            <p class="fw-600 mb-2" style="color:var(--text);" th:text="${ans.question.questionText}">Q</p>
+                            <div class="mb-3">
+                                <span th:class="'badge difficulty-' + ${#strings.toLowerCase(ans.question.difficulty)}"
+                                      th:text="${ans.question.difficulty}">MEDIUM</span>
+                            </div>
+
+                            <div class="row g-3">
+                                <!-- Your answer -->
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded" style="background:rgba(99,102,241,0.06);border:1px solid var(--border);">
+                                        <div class="fw-600 mb-2" style="font-size:0.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">
+                                            <i class="bi bi-person me-1"></i>Your Answer
+                                        </div>
+                                        <p style="font-size:0.875rem;color:var(--text);margin:0;white-space:pre-wrap;"
+                                           th:text="${ans.userAnswer != null && !ans.userAnswer.isBlank() ? ans.userAnswer : '(No answer provided)'}">Answer</p>
+                                    </div>
+                                </div>
+                                <!-- Reference answer -->
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded" style="background:var(--success-dim);border:1px solid rgba(16,185,129,0.2);">
+                                        <div class="fw-600 mb-2" style="font-size:0.78rem;color:var(--success);text-transform:uppercase;letter-spacing:0.5px;">
+                                            <i class="bi bi-check2-circle me-1"></i>Reference Answer
+                                        </div>
+                                        <p style="font-size:0.875rem;color:var(--text);margin:0;"
+                                           th:text="${ans.question.expectedAnswer}">Expected</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AI Feedback -->
+                            <div th:if="${ans.aiFeedback != null}" class="mt-3 p-3 rounded"
+                                 style="background:rgba(99,102,241,0.08);border-left:3px solid var(--primary);">
+                                <div class="fw-600 mb-1" style="font-size:0.78rem;color:var(--primary-light);text-transform:uppercase;letter-spacing:0.5px;">
+                                    <i class="bi bi-robot me-1"></i> AI Feedback
+                                </div>
+                                <p style="font-size:0.875rem;color:var(--text-muted);margin:0;"
+                                   th:text="${ans.aiFeedback}">Feedback</p>
+                            </div>
+
+                            <!-- Strengths, Weaknesses, Topics -->
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-4" th:if="${ans.strengthList.length > 0}">
+                                    <div class="fw-600 mb-1" style="font-size:0.75rem;color:var(--success);">
+                                        <i class="bi bi-check-circle me-1"></i>Strengths
+                                    </div>
+                                    <span class="tag-pill tag-strength" th:each="s : ${ans.strengthList}" th:text="${s}">S</span>
+                                </div>
+                                <div class="col-md-4" th:if="${ans.weaknessList.length > 0}">
+                                    <div class="fw-600 mb-1" style="font-size:0.75rem;color:var(--danger);">
+                                        <i class="bi bi-x-circle me-1"></i>Weaknesses
+                                    </div>
+                                    <span class="tag-pill tag-weakness" th:each="w : ${ans.weaknessList}" th:text="${w}">W</span>
+                                </div>
+                                <div class="col-md-4" th:if="${ans.recommendedTopicList.length > 0}">
+                                    <div class="fw-600 mb-1" style="font-size:0.75rem;color:var(--info);">
+                                        <i class="bi bi-book me-1"></i>Study Next
+                                    </div>
+                                    <span class="tag-pill tag-topic" th:each="t : ${ans.recommendedTopicList}" th:text="${t}">T</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script th:inline="javascript">
+    window.animateScoreRing(/*[[${score}]]*/ 0);
+</script>
+</body>
+</html>

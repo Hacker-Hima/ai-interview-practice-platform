@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark" lang="en">
+<head th:replace="~{fragments/layout :: head('Question Bank')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container-fluid px-4 py-4">
+    <div class="page-header animate-in d-flex align-items-center justify-content-between">
+        <div>
+            <h1 class="page-title"><i class="bi bi-question-circle me-2" style="color:var(--primary-light);"></i>Question Bank</h1>
+            <p class="page-subtitle">Search, filter, and manage interview questions</p>
+        </div>
+        <a th:href="@{/admin/questions/add}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Question
+        </a>
+    </div>
+
+    <!-- Flash -->
+    <div th:if="${success}" class="alert alert-success auto-dismiss animate-in">
+        <i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span>
+    </div>
+
+    <!-- ── Filters ────────────────────────────────────────────────────────── -->
+    <div class="card animate-in mb-4">
+        <div class="card-body">
+            <form th:action="@{/admin/questions}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Search</label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background:var(--bg-input);border-color:var(--border);color:var(--text-muted);">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="keyword" class="form-control"
+                               placeholder="Search questions..." th:value="${keyword}"/>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Domain</label>
+                    <select name="domainId" class="form-select">
+                        <option value="">All Domains</option>
+                        <option th:each="d : ${domains}"
+                                th:value="${d.id}"
+                                th:text="${d.name}"
+                                th:selected="${selectedDomainId != null && selectedDomainId == d.id}">Domain</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Difficulty</label>
+                    <select name="difficulty" class="form-select">
+                        <option value="">All</option>
+                        <option value="EASY" th:selected="${selectedDifficulty == 'EASY'}">Easy</option>
+                        <option value="MEDIUM" th:selected="${selectedDifficulty == 'MEDIUM'}">Medium</option>
+                        <option value="HARD" th:selected="${selectedDifficulty == 'HARD'}">Hard</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-funnel"></i> Filter
+                    </button>
+                    <a th:href="@{/admin/questions}" class="btn btn-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Question Table ─────────────────────────────────────────────────── -->
+    <div class="card animate-in">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <span><i class="bi bi-list-ul me-2" style="color:var(--primary-light);"></i>Questions</span>
+            <span class="badge" style="background:rgba(99,102,241,0.15);color:var(--primary-light);"
+                  th:text="${#lists.size(questions)} + ' results'">0</span>
+        </div>
+        <div th:if="${#lists.isEmpty(questions)}" class="card-body text-center py-5" style="color:var(--text-dim);">
+            <i class="bi bi-inbox" style="font-size:2rem;"></i>
+            <p class="mt-2">No questions found. Try adjusting filters or add a new one.</p>
+        </div>
+        <div th:if="${!#lists.isEmpty(questions)}" class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr><th>#</th><th>Question</th><th>Domain</th><th>Difficulty</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    <tr th:each="q, stat : ${questions}">
+                        <td style="color:var(--text-dim);" th:text="${stat.index + 1}">1</td>
+                        <td style="max-width:400px;">
+                            <span th:text="${#strings.abbreviate(q.questionText, 90)}">Question text</span>
+                        </td>
+                        <td>
+                            <span class="badge" style="background:rgba(99,102,241,0.15);color:var(--primary-light);"
+                                  th:text="${q.domain.name}">Java</span>
+                        </td>
+                        <td>
+                            <span th:class="'badge difficulty-' + ${#strings.toLowerCase(q.difficulty)}"
+                                  th:text="${q.difficulty}">MEDIUM</span>
+                        </td>
+                        <td>
+                            <a th:href="@{'/admin/questions/edit/' + ${q.id}}" class="btn btn-secondary btn-sm me-1">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a th:href="@{'/admin/questions/delete/' + ${q.id}}"
+                               class="btn btn-danger btn-sm"
+                               data-confirm="Delete this question permanently?">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
